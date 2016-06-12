@@ -1,1 +1,21 @@
-@import 'bootstrap'
+@import 'bootstrap';
+
+.container {
+    margin-top: 30px;
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 730px;
+  }
+}
+
+.jumbotron {
+  text-align: center;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+p.lead {
+    margin-top: 25px;
+    margin-bottom: 25px;
+}
