@@ -4,10 +4,11 @@
         <title>Apologies &#x2463; Men</title>
         <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
         <link rel="stylesheet" type="text/css" href="css/styles.css"/>
+        <script src='index.js'></script>
     </head>
     <body>
         <div class='container'>
-            <div class='jumbotron'>
+            <div class='jumbotron' id='intro'>
                 <h1>Apologies 4 Men</h1>
                 <p class='lead'>
                     Did you mess up? Did you mess up real bad? And now,
@@ -15,16 +16,50 @@
                     Our patent-pending, artificially intelligent
                     ApologeticsEngine<sup>&#x2122;&#xa9;</sup> will craft a
                     perfectly formed apology, customized for your
-                    personalisty, lifestyle and situation.  Whatever you
+                    personality, lifestyle and situation.  Whatever you
                     may have done, and whomever you may have wronged,
                     this apology is guaranteed to melt hearts and mend
                     bridges.
                 </p>
-                <a
+                <button
                     class='btn btn-lg btn-success'
-                    href='#'
-                    role='button'
-                >Let's get Started!</a>
+                    id='start'
+                >Let's get Started!</button>
+            </div>
+            <div class='jumbotron' id='questions'>
+                <h1>Tell Me About It</h1>
+                <div class='form-group'>
+                    <label for='fucker'>What's your name?</label>
+                    <input
+                        class='form-control'
+                        id='fucker'
+                        maxlength=20
+                    />
+                </div>
+                <div class='form-group'>
+                    <label for='fuckee'>Whom did you wrong?</label>
+                    <input
+                        class='form-control'
+                        id='fuckee'
+                        maxlength=20
+                    />
+                </div>
+                <div class='form-group' id='fuckup-group'>
+                    <label for='fuckup'>What did you do?</label>
+                    <input
+                        class='form-control'
+                        id='fuckup'
+                     />
+                </div>
+                <button
+                    class='btn btn-lg btn-default'
+                    id='more'
+                >There was one more thing...</button>
+                <button
+                    class='btn btn-lg btn-success'
+                    disabled='disabled'
+                    id='generate'
+                >That's it!</button>
             </div>
         </div>
     </body>

@@ -1,6 +1,8 @@
-var browserSync = require('browser-sync').create();
+var babel = require('gulp-babel')
+var browserSync = require('browser-sync').create()
 var gulp = require('gulp')
 var sass = require('gulp-sass')
+var webpack = require('webpack-stream')
 
 gulp.task('browserSync', function() {
     browserSync.init({
@@ -23,14 +25,33 @@ gulp.task('sass', function() {
 
 gulp.task('html', function() {
     return gulp
-        .src('html/*')
+        .src('html/*.html')
         .pipe(gulp.dest('dist'))
 })
 
-gulp.task('build', ['html', 'sass'])
+gulp.task('js', function() {
+    return gulp
+        .src('js/index.js')
+        .pipe(webpack({
+            output: {
+                library: 'Index',
+                filename: 'index.js',
+                libraryTarget: 'umd'
+            },
+            module: {
+                loaders: [{
+                    loader: 'babel-loader'
+                }]
+            }
+        }))
+        .pipe(gulp.dest('dist'))
+})
+
+gulp.task('build', ['html', 'sass', 'js'])
 
 gulp.task('watch', ['browserSync', 'build'], function() {
     gulp.watch('style/*', ['sass'])
     gulp.watch('html/*', ['html'])
+    gulp.watch('js/*', ['js'])
     gulp.watch('dist/**/*', browserSync.reload)
 })
