@@ -38,6 +38,7 @@ gulp.task('js', function() {
                 filename: 'index.js',
                 libraryTarget: 'umd'
             },
+            devtool: 'source-map',
             module: {
                 loaders: [{
                     loader: 'babel-loader'
