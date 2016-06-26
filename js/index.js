@@ -96,15 +96,53 @@ $(() => {
             }
 
             let ctx = canvas.getContext('2d')
-            ctx.font = '25px'
-            let y = 20
-            for (let arr of text) {
-                let lines = splitLines(arr.join(''), ctx, canvas.width)
-                for (let line of lines) {
-                    ctx.fillText(line, 10, y)
-                    y += 25
+            let fontSize = 30
+            let lines = []
+            while (true) {
+                lines = []
+                fontSize++
+                ctx.font = fontSize + 'px sans-serif'
+                for (let arr of text) {
+                    lines = lines.concat(splitLines(
+                        arr.join(''),
+                        ctx,
+                        canvas.width - (fontSize * 3)
+                    ))
+                    lines.push('')
+                }
+                lines.splice(lines.length - 1, 1)
+                lines.splice(lines.length - 2, 1)
+                if (
+                    (lines.length * fontSize * 1.1) >
+                    (
+                        canvas.height -
+                        (fontSize * 1.5) -
+                        ((fontSize * 1.1) + 50)
+                    )
+                ) {
+                    fontSize--
+                    ctx.font = fontSize + 'px sans-serif'
+                    break
                 }
             }
+            let y = fontSize * 1.5
+            for (let line of lines) {
+                if (line.length) {
+                    ctx.fillText(line, fontSize * 1.5, y)
+                }
+                y += fontSize * 1.1
+            }
+            ctx.font = '12px serif'
+            ctx.moveTo(fontSize * 1.5, y)
+            ctx.lineTo((fontSize * 1.5) + 150, y)
+            y += 18
+            ctx.fillText('Like this card?  Visit us at', fontSize * 1.5, y)
+            y += 14
+            ctx.fillText('www.apologies4men.com!', fontSize * 1.5, y)
+            y += 10
+            ctx.moveTo(fontSize * 1.5, y)
+            ctx.lineTo((fontSize * 1.5) + 150, y)
+            ctx.stroke()
         })
     })
     // FAKE CODE
@@ -112,14 +150,14 @@ $(() => {
     setTimeout(() => {
         $('#fucker').val('Fucker')
         $('#fuckee').val('Fuckee')
-        $('#fuckup').val('Fuckup')
+        $('#fuckup').val('Some very long peice of text that will take up space')
         $('#more').click()
         $('#more').click()
         $('#more').click()
         setTimeout(() => {
-            $('#fuckup1').val('Fuckup1')
-            $('#fuckup2').val('Fuckup2')
-            $('#fuckup3').val('Fuckup3')
+            $('#fuckup1').val('This is a lot of text')
+            $('#fuckup2').val('This is a very long piece of text to fill up space')
+            $('#fuckup3').val('This is yet another super long piece of text')
             $('#generate').click()
         }, 1000)
     }, 1000)
