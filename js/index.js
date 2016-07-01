@@ -126,23 +126,66 @@ $(() => {
                 }
             }
             let y = fontSize * 1.5
-            for (let line of lines) {
-                if (line.length) {
-                    ctx.fillText(line, fontSize * 1.5, y)
+            let x = fontSize * 1.5
+            let waitTime = 20000 / [].concat.apply([], text).join('').length
+            let line = 0, letter = 0, delta = 0, lastFrameTime = 0
+            let tick = (timestamp) => {
+                ctx.font = fontSize + 'px sans-serif'
+                let done = false
+                if (lastFrameTime != 0) {
+                    delta += timestamp - lastFrameTime
+                    while (delta >= waitTime) {
+                        delta -= waitTime
+                        ctx.fillText(lines[line].charAt(letter), x, y)
+                        x += ctx.measureText(lines[line].charAt(letter)).width
+                        letter++
+                        if (lines[line].charAt(letter) == ' ') {
+                            x += ctx.measureText(
+                                lines[line].charAt(letter)
+                            ).width
+                            letter++
+                        }
+                        if (letter >= lines[line].length) {
+                            letter = 0
+                            x = fontSize * 1.5
+                            line++
+                            y += fontSize * 1.1
+                            if (
+                                (line < lines.length) &&
+                                (lines[line].length == 0)
+                            ) {
+                                line++
+                                y += fontSize * 1.1
+                            }
+                        }
+                        if (line >= lines.length) {
+                            done = true
+                        }
+                    }
                 }
-                y += fontSize * 1.1
+                lastFrameTime = timestamp
+                if (done) {
+                    ctx.font = '12px serif'
+                    ctx.moveTo(fontSize * 1.5, y)
+                    ctx.lineTo((fontSize * 1.5) + 150, y)
+                    y += 18
+                    ctx.fillText(
+                        'Like this card?  Visit us at',
+                        fontSize * 1.5,
+                        y
+                    )
+                    y += 14
+                    ctx.fillText('www.apologies4men.com!', fontSize * 1.5, y)
+                    y += 10
+                    ctx.moveTo(fontSize * 1.5, y)
+                    ctx.lineTo((fontSize * 1.5) + 150, y)
+                    ctx.stroke()
+                }
+                else {
+                    requestAnimationFrame(tick)
+                }
             }
-            ctx.font = '12px serif'
-            ctx.moveTo(fontSize * 1.5, y)
-            ctx.lineTo((fontSize * 1.5) + 150, y)
-            y += 18
-            ctx.fillText('Like this card?  Visit us at', fontSize * 1.5, y)
-            y += 14
-            ctx.fillText('www.apologies4men.com!', fontSize * 1.5, y)
-            y += 10
-            ctx.moveTo(fontSize * 1.5, y)
-            ctx.lineTo((fontSize * 1.5) + 150, y)
-            ctx.stroke()
+            requestAnimationFrame(tick)
         })
     })
     // FAKE CODE
