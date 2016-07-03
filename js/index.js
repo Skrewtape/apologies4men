@@ -37,6 +37,7 @@ $(() => {
     $('#generate').click(() => {
         $('#questions').fadeOut(() => {
             let canvas = $('<canvas/>')
+            let overlay = $('<div/>')
             let windowHeight = $(window.top).height()
             let windowWidth = $(window.top).width()
             let targetAspect = 8.5 / 11.0
@@ -49,11 +50,14 @@ $(() => {
                 canvasWidth = (windowWidth * 0.95)
                 canvasHeight = canvasWidth / targetAspect
             }
+            overlay.width(canvasWidth).height(canvasHeight)
+            overlay.css('opacity', '0')
             canvas.width(canvasWidth).height(canvasHeight)
-            canvas.css('background-color', 'red')
             $('body').append(canvas)
+            $('body').append(overlay)
             canvas = canvas.get()[0]
             center(canvas)
+            center(overlay.get()[0])
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
 
@@ -89,6 +93,7 @@ $(() => {
                 fontSize,
                 text,
                 canvas.width,
+                canvas.height,
                 ctx,
                 inputRanges
             )
@@ -98,12 +103,13 @@ $(() => {
                     fontSize,
                     text,
                     canvas.width,
+                    canvas.height,
                     ctx,
                     inputRanges
                 )
                 if (
                     potentialCommands[potentialCommands.length - 1].y >
-                    (canvas.height - (fontSize * 0.4) - 50)
+                    (canvas.height - fontSize - 50)
                 ) {
                     fontSize--
                     break
@@ -127,6 +133,9 @@ $(() => {
                     lastFrameTime = timestamp
                     waitTime = commands[0].delay
                     requestAnimationFrame(tick)
+                }
+                else {
+                    overlay.remove()
                 }
             }
             requestAnimationFrame(tick)
@@ -157,7 +166,10 @@ $(() => {
         return text
     }
 
-    function generateCommands(fontSize, text, width, ctx, inputRanges) {
+    function generateCommands(
+        fontSize, text, width,
+        height, ctx, inputRanges
+    ) {
         let margin = fontSize * 1.5
         let commands = []
         let x = margin
@@ -212,7 +224,7 @@ $(() => {
             y: y,
             delay: baseDelay,
             render: (context) => {
-                let yCopy = y + margin
+                let yCopy = height - 50
                 context.font = '12px serif'
                 context.moveTo(margin, yCopy)
                 context.lineTo(margin + 150, yCopy)
