@@ -106,7 +106,7 @@ $(() => {
         }
         text += 'I hope you feel the same way.\n\n'
         text += 'I mean this. I mean every word.\n'
-        text = appendInput(text, 'fuckee', inputRanges)
+        text = appendInput(text, 'fucker', inputRanges)
 
         let ctx = canvas.getContext('2d')
         let fontSize = 10
