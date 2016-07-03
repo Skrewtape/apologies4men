@@ -1,6 +1,9 @@
 var browserSync = require('browser-sync').create()
+var del = require('del')
 var gulp = require('gulp')
+var runSequence = require('run-sequence')
 var sass = require('gulp-sass')
+var uglify = require('gulp-uglify')
 var webpack = require('webpack-stream')
 
 gulp.task('browserSync', function() {
@@ -52,6 +55,30 @@ gulp.task('js', function() {
 })
 
 gulp.task('build', ['html', 'sass', 'js'])
+
+gulp.task('clean', function() {
+    return del(['dist/**/*'])
+})
+
+gulp.task('clear-sourcemaps', function() {
+    return del(['dist/index.js.map'])
+})
+
+gulp.task('build-ugly', ['build'], function() {
+    return gulp
+        .src('dist/index.js')
+        .pipe(uglify({ mangle: { toplevel: true }}))
+        .pipe(gulp.dest('dist'))
+})
+
+gulp.task('dist', function(callback) {
+    runSequence(
+        'clean',
+        'build-ugly',
+        'clear-sourcemaps',
+        callback
+    )
+})
 
 gulp.task('watch', ['browserSync', 'build'], function() {
     gulp.watch('style/*', ['sass'])
