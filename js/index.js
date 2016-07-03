@@ -57,131 +57,75 @@ $(() => {
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
 
-            let text = [
-                ['Dear ', $('#fuckee').val().trim(), ','],
-                [
-                    'I am deeply sorry that ',
-                    $('#fuckup').val().trim(),
-                    'I know it was my fault. ',
-                    'I never meant for that to happen. ',
-                    'I never dreamed it could.'
-                ],
-                ['I hope you feel the same way.'],
-                ['I mean this. I mean every word.'],
-                [$('#fucker').val().trim()]
-            ]
+            let text = ''
+            let inputRanges = []
 
-            text[1][1] = appendPeriod(text[1][1])
-
-            let first = true
-            for (let i of [5, 4, 3, 2, 1]) {
-                let elem = $('#fuckup' + i)
-                if (elem.length) {
-                    text[2].splice(0, 0, elem.val().trim())
-                    if (first) {
-                        text[2][0] = appendPeriod(text[2][0])
-                        first = false
+            text += 'Dear '
+            text = appendInput(text, 'fuckee', inputRanges)
+            text += ',\n\nI am deeply sorry that '
+            text = appendInput(text, 'fuckup', inputRanges)
+            text = appendPeriod(text)
+            text += 'I know it was my fault. '
+            text += 'I never meant for that to happen. '
+            text += 'I never dreamed it could.\n\n'
+            if ($('#fuckup1').length) {
+                text += 'I am also sorry that '
+                text = appendInput(text, 'fuckup1', inputRanges)
+                for (let i of [2, 3, 4, 5]) {
+                    if ($('#fuckup' + i).length) {
+                        text += ' and that '
+                        text = appendInput(text, 'fuckup' + i, inputRanges)
                     }
-                    else {
-                        text[2][0] += ' '
-                    }
-                    text[2].splice(
-                        0, 0, (
-                            i == 1 ?
-                            'I am also sorry that ' :
-                            'and that '
-                        )
-                    )
                 }
+                text = appendPeriod(text)
             }
+            text += 'I hope you feel the same way.\n\n'
+            text += 'I mean this. I mean every word.\n'
+            text = appendInput(text, 'fuckee', inputRanges)
 
             let ctx = canvas.getContext('2d')
-            let fontSize = 30
-            let lines = []
+            let fontSize = 10
+            let commands = generateCommands(
+                fontSize,
+                text,
+                canvas.width,
+                ctx,
+                inputRanges
+            )
             while (true) {
-                lines = []
                 fontSize++
-                ctx.font = fontSize + 'px sans-serif'
-                for (let arr of text) {
-                    lines = lines.concat(splitLines(
-                        arr.join(''),
-                        ctx,
-                        canvas.width - (fontSize * 3)
-                    ))
-                    lines.push('')
-                }
-                lines.splice(lines.length - 1, 1)
-                lines.splice(lines.length - 2, 1)
+                let potentialCommands = generateCommands(
+                    fontSize,
+                    text,
+                    canvas.width,
+                    ctx,
+                    inputRanges
+                )
                 if (
-                    (lines.length * fontSize * 1.1) >
-                    (
-                        canvas.height -
-                        (fontSize * 1.5) -
-                        ((fontSize * 1.1) + 50)
-                    )
+                    potentialCommands[potentialCommands.length - 1].y >
+                    (canvas.height - (fontSize * 0.4) - 50)
                 ) {
                     fontSize--
-                    ctx.font = fontSize + 'px sans-serif'
                     break
                 }
+                else {
+                    commands = potentialCommands
+                }
             }
-            let y = fontSize * 1.5
-            let x = fontSize * 1.5
-            let waitTime = 20000 / [].concat.apply([], text).join('').length
-            let line = 0, letter = 0, delta = 0, lastFrameTime = 0
+
+            let waitTime = 0, delta = 0, lastFrameTime = 0
             let tick = (timestamp) => {
-                ctx.font = fontSize + 'px sans-serif'
-                let done = false
                 if (lastFrameTime != 0) {
                     delta += timestamp - lastFrameTime
                     while (delta >= waitTime) {
                         delta -= waitTime
-                        ctx.fillText(lines[line].charAt(letter), x, y)
-                        x += ctx.measureText(lines[line].charAt(letter)).width
-                        letter++
-                        if (lines[line].charAt(letter) == ' ') {
-                            x += ctx.measureText(
-                                lines[line].charAt(letter)
-                            ).width
-                            letter++
-                        }
-                        if (letter >= lines[line].length) {
-                            letter = 0
-                            x = fontSize * 1.5
-                            line++
-                            y += fontSize * 1.1
-                            if (
-                                (line < lines.length) &&
-                                (lines[line].length == 0)
-                            ) {
-                                line++
-                                y += fontSize * 1.1
-                            }
-                        }
-                        if (line >= lines.length) {
-                            done = true
-                        }
+                        let command = commands.shift()
+                        command.render(ctx)
                     }
                 }
-                lastFrameTime = timestamp
-                if (done) {
-                    ctx.font = '12px serif'
-                    ctx.moveTo(fontSize * 1.5, y)
-                    ctx.lineTo((fontSize * 1.5) + 150, y)
-                    y += 18
-                    ctx.fillText(
-                        'Like this card?  Visit us at',
-                        fontSize * 1.5,
-                        y
-                    )
-                    y += 14
-                    ctx.fillText('www.apologies4men.com!', fontSize * 1.5, y)
-                    y += 10
-                    ctx.moveTo(fontSize * 1.5, y)
-                    ctx.lineTo((fontSize * 1.5) + 150, y)
-                    ctx.stroke()
-                }
-                else {
+                if (commands.length) {
+                    lastFrameTime = timestamp
+                    waitTime = commands[0].delay
                     requestAnimationFrame(tick)
                 }
             }
@@ -193,7 +137,7 @@ $(() => {
     setTimeout(() => {
         $('#fucker').val('Fucker')
         $('#fuckee').val('Fuckee')
-        $('#fuckup').val('Some very long peice of text that will take up space')
+        $('#fuckup').val('Some very long piece of text that will take up space')
         $('#more').click()
         $('#more').click()
         $('#more').click()
@@ -213,24 +157,94 @@ $(() => {
         return text
     }
 
-    function splitLines(text, ctx, width) {
-        let lines = ['']
-        for (let word of text.split(' ')) {
-            let lastLine = lines[lines.length - 1]
-            if (lastLine.length == 0) {
-                lines[lines.length - 1] = word
+    function generateCommands(fontSize, text, width, ctx, inputRanges) {
+        let margin = fontSize * 1.5
+        let commands = []
+        let x = margin
+        let y = margin + fontSize
+        let baseDelay = 30000 / text.length
+        ctx.font = fontSize + 'px sans-serif'
+        for (let i = 0; i < text.length; i++) {
+            let letter = text[i]
+            if (letter == '\n') {
+                y += fontSize * 1.1
+                x = margin
             }
-            else {
-                let potentialLine = lastLine
-                potentialLine += ' ' + word
-                if (ctx.measureText(potentialLine).width > width) {
-                    lines.push(word)
+            else if (letter == ' ') {
+                let widthOfNextWord = 0
+                let j = 1
+                while (
+                    (i + j < text.length) &&
+                    (text[i + j] != ' ') &&
+                    (text[i + j] != '\n')
+                ) {
+                    widthOfNextWord += ctx.measureText(text[i + j]).width
+                    j++
+                }
+                if ((x + widthOfNextWord) > (width - margin)) {
+                    y += fontSize * 1.1
+                    x = margin
                 }
                 else {
-                    lines[lines.length - 1] = potentialLine
+                    x += ctx.measureText(letter).width
                 }
             }
+            else {
+                let yCopy = y
+                let xCopy = x
+                let delay = baseDelay
+                if (isInput(i, inputRanges)) {
+                    yCopy -= 2
+                    delay += (Math.random() * 2 * delay)
+                }
+                commands.push({
+                    y: yCopy,
+                    render: (context) => {
+                        context.font = fontSize + 'px sans-serif'
+                        context.fillText(letter, xCopy, yCopy)
+                    },
+                    delay: delay
+                })
+                x += ctx.measureText(letter).width
+            }
         }
-        return lines
+        commands.push({
+            y: y,
+            delay: baseDelay,
+            render: (context) => {
+                let yCopy = y + margin
+                context.font = '12px serif'
+                context.moveTo(margin, yCopy)
+                context.lineTo(margin + 150, yCopy)
+                yCopy += 18
+                context.fillText(
+                    'Like this card?  Visit us at',
+                    margin,
+                    yCopy
+                )
+                yCopy += 14
+                context.fillText('www.apologies4men.com!', margin, yCopy)
+                yCopy += 10
+                context.moveTo(margin, yCopy)
+                context.lineTo(margin + 150, yCopy)
+                context.stroke()
+            }
+        })
+        return commands
+    }
+
+    function appendInput(text, inputName, inputRanges) {
+        let value = $('#' + inputName).val().trim()
+        inputRanges.push({ start: text.length, end: text.length + value.length})
+        return text + value
+    }
+
+    function isInput(index, inputRanges) {
+        for (let range of inputRanges) {
+            if (index >= range.start && index < range.end) {
+                return true
+            }
+        }
+        return false
     }
 })

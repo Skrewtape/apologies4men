@@ -1,4 +1,3 @@
-var babel = require('gulp-babel')
 var browserSync = require('browser-sync').create()
 var gulp = require('gulp')
 var sass = require('gulp-sass')
@@ -41,7 +40,11 @@ gulp.task('js', function() {
             devtool: 'source-map',
             module: {
                 loaders: [{
-                    loader: 'babel-loader'
+                    loader: 'babel',
+                    exclude: /node_modules/,
+                    query: {
+                        presets: ['es2015']
+                    }
                 }]
             }
         }))
