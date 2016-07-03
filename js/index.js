@@ -36,60 +36,91 @@ $(() => {
     })
     $('#generate').click(() => {
         $('#questions').fadeOut(() => {
-            let canvas = $('<canvas/>')
-            let overlay = $('<div/>')
-            let windowHeight = $(window.top).height()
-            let windowWidth = $(window.top).width()
-            let targetAspect = 8.5 / 11.0
-            let canvasHeight, canvasWidth
-            if ((windowWidth / windowHeight) > targetAspect) {
-                canvasHeight = (windowHeight * 0.95)
-                canvasWidth = canvasHeight * targetAspect
-            }
-            else {
-                canvasWidth = (windowWidth * 0.95)
-                canvasHeight = canvasWidth / targetAspect
-            }
-            overlay.width(canvasWidth).height(canvasHeight)
-            overlay.css('opacity', '0')
-            canvas.width(canvasWidth).height(canvasHeight)
-            $('body').append(canvas)
-            $('body').append(overlay)
-            canvas = canvas.get()[0]
-            center(canvas)
-            center(overlay.get()[0])
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
+            $('#loading').fadeIn(fadeMessage)
+        })
+    })
+    let loadingMessages = [
+        'Loading Social Matrix...',
+        'Reticulating Splines...',
+        'Optimizing Verbiage...'
+    ]
+    let fadeMessage = () => {
+        if (loadingMessages.length) {
+            $('#message').fadeOut(1500, () => {
+                $('#message')
+                    .text(loadingMessages.shift())
+                    .fadeIn(fadeMessage)
+            })
+        }
+        else {
+            $('#loading').fadeOut(1500, draw)
+        }
+    }
+    let draw = () => {
+        let canvas = $('<canvas/>')
+        let overlay = $('<div/>')
+        let windowHeight = $(window.top).height()
+        let windowWidth = $(window.top).width()
+        let targetAspect = 8.5 / 11.0
+        let canvasHeight, canvasWidth
+        if ((windowWidth / windowHeight) > targetAspect) {
+            canvasHeight = (windowHeight * 0.95)
+            canvasWidth = canvasHeight * targetAspect
+        }
+        else {
+            canvasWidth = (windowWidth * 0.95)
+            canvasHeight = canvasWidth / targetAspect
+        }
+        overlay.width(canvasWidth).height(canvasHeight)
+        overlay.css('opacity', '0')
+        canvas.width(canvasWidth).height(canvasHeight)
+        $('body').append(canvas)
+        $('body').append(overlay)
+        canvas = canvas.get()[0]
+        center(canvas)
+        center(overlay.get()[0])
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
 
-            let text = ''
-            let inputRanges = []
+        let text = ''
+        let inputRanges = []
 
-            text += 'Dear '
-            text = appendInput(text, 'fuckee', inputRanges)
-            text += ',\n\nI am deeply sorry that '
-            text = appendInput(text, 'fuckup', inputRanges)
-            text = appendPeriod(text)
-            text += 'I know it was my fault. '
-            text += 'I never meant for that to happen. '
-            text += 'I never dreamed it could.\n\n'
-            if ($('#fuckup1').length) {
-                text += 'I am also sorry that '
-                text = appendInput(text, 'fuckup1', inputRanges)
-                for (let i of [2, 3, 4, 5]) {
-                    if ($('#fuckup' + i).length) {
-                        text += ' and that '
-                        text = appendInput(text, 'fuckup' + i, inputRanges)
-                    }
+        text += 'Dear '
+        text = appendInput(text, 'fuckee', inputRanges)
+        text += ',\n\nI am deeply sorry that '
+        text = appendInput(text, 'fuckup', inputRanges)
+        text = appendPeriod(text)
+        text += 'I know it was my fault. '
+        text += 'I never meant for that to happen. '
+        text += 'I never dreamed it could.\n\n'
+        if ($('#fuckup1').length) {
+            text += 'I am also sorry that '
+            text = appendInput(text, 'fuckup1', inputRanges)
+            for (let i of [2, 3, 4, 5]) {
+                if ($('#fuckup' + i).length) {
+                    text += ' and that '
+                    text = appendInput(text, 'fuckup' + i, inputRanges)
                 }
-                text = appendPeriod(text)
             }
-            text += 'I hope you feel the same way.\n\n'
-            text += 'I mean this. I mean every word.\n'
-            text = appendInput(text, 'fuckee', inputRanges)
+            text = appendPeriod(text)
+        }
+        text += 'I hope you feel the same way.\n\n'
+        text += 'I mean this. I mean every word.\n'
+        text = appendInput(text, 'fuckee', inputRanges)
 
-            let ctx = canvas.getContext('2d')
-            let fontSize = 10
-            let commands = generateCommands(
+        let ctx = canvas.getContext('2d')
+        let fontSize = 10
+        let commands = generateCommands(
+            fontSize,
+            text,
+            canvas.width,
+            canvas.height,
+            ctx,
+            inputRanges
+        )
+        while (true) {
+            fontSize++
+            let potentialCommands = generateCommands(
                 fontSize,
                 text,
                 canvas.width,
@@ -97,50 +128,39 @@ $(() => {
                 ctx,
                 inputRanges
             )
-            while (true) {
-                fontSize++
-                let potentialCommands = generateCommands(
-                    fontSize,
-                    text,
-                    canvas.width,
-                    canvas.height,
-                    ctx,
-                    inputRanges
-                )
-                if (
-                    potentialCommands[potentialCommands.length - 1].y >
-                    (canvas.height - fontSize - 50)
-                ) {
-                    fontSize--
-                    break
-                }
-                else {
-                    commands = potentialCommands
-                }
+            if (
+                potentialCommands[potentialCommands.length - 1].y >
+                (canvas.height - fontSize - 50)
+            ) {
+                fontSize--
+                break
             }
+            else {
+                commands = potentialCommands
+            }
+        }
 
-            let waitTime = 0, delta = 0, lastFrameTime = 0
-            let tick = (timestamp) => {
-                if (lastFrameTime != 0) {
-                    delta += timestamp - lastFrameTime
-                    while (delta >= waitTime) {
-                        delta -= waitTime
-                        let command = commands.shift()
-                        command.render(ctx)
-                    }
-                }
-                if (commands.length) {
-                    lastFrameTime = timestamp
-                    waitTime = commands[0].delay
-                    requestAnimationFrame(tick)
-                }
-                else {
-                    overlay.remove()
+        let waitTime = 0, delta = 0, lastFrameTime = 0
+        let tick = (timestamp) => {
+            if (lastFrameTime != 0) {
+                delta += timestamp - lastFrameTime
+                while (delta >= waitTime) {
+                    delta -= waitTime
+                    let command = commands.shift()
+                    command.render(ctx)
                 }
             }
-            requestAnimationFrame(tick)
-        })
-    })
+            if (commands.length) {
+                lastFrameTime = timestamp
+                waitTime = commands[0].delay
+                requestAnimationFrame(tick)
+            }
+            else {
+                overlay.remove()
+            }
+        }
+        requestAnimationFrame(tick)
+    }
     // FAKE CODE
     $('#start').click()
     setTimeout(() => {
