@@ -161,22 +161,6 @@ $(() => {
         }
         requestAnimationFrame(tick)
     }
-    // FAKE CODE
-    $('#start').click()
-    setTimeout(() => {
-        $('#fucker').val('Fucker')
-        $('#fuckee').val('Fuckee')
-        $('#fuckup').val('Some very long piece of text that will take up space')
-        $('#more').click()
-        $('#more').click()
-        $('#more').click()
-        setTimeout(() => {
-            $('#fuckup1').val('This is a lot of text')
-            $('#fuckup2').val('This is a very long piece of text to fill up space')
-            $('#fuckup3').val('This is yet another super long piece of text')
-            $('#generate').click()
-        }, 1000)
-    }, 1000)
 
     function appendPeriod(text) {
         if (!text.endsWith('.')) {
