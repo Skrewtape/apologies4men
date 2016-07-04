@@ -3,15 +3,21 @@ import $ from 'jquery'
 import center from 'center'
 
 $(() => {
-    let inputs = $('input').toArray()
     $('#start').click(() => {
         $('#intro').fadeOut(() => {
             $('#questions').fadeIn()
         })
     })
+    let checkGenerate = () => {
+        $('#generate').prop('disabled', (
+            $('input').filter(
+                (idx, input) => input.value.trim().length == 0
+            ).length > 0
+        ))
+    }
     $('#more').click(() => {
         let newgroup = $('#fuckup-group').clone()
-        let newnum = inputs.length - 2
+        let newnum = $('input').length - 2
         newgroup.prop('id', 'fuckup-group' + newnum)
         newgroup.hide()
         let label = newgroup.children().first()
@@ -20,20 +26,14 @@ $(() => {
         let input = newgroup.children().last()
         input.prop('id', label.prop('for'))
         input.val('')
-        inputs.push(input)
         $('#more').before(newgroup)
         newgroup.fadeIn()
-        if (inputs.length > 5) {
+        if ($('input').length > 5) {
             $('#more').hide()
         }
+        checkGenerate()
     })
-    $(document).on('keyup', 'input', () => {
-        $('#generate').prop('disabled', (
-            inputs.filter(
-                (input) => input.value.trim().length == 0
-            ).length > 0
-        ))
-    })
+    $(document).on('keyup', 'input', checkGenerate)
     $('#generate').click(() => {
         $('#questions').fadeOut(() => {
             $('#loading').fadeIn(fadeMessage)
@@ -157,6 +157,16 @@ $(() => {
             }
             else {
                 overlay.remove()
+                let note = $(
+                    '<span class="note">(Right click, save as...)</span>'
+                )
+                $('body').append(note)
+                note.css(
+                    'left',
+                    canvas.width +
+                    parseInt(canvas.style.left) -
+                    note.width()
+                )
             }
         }
         requestAnimationFrame(tick)
@@ -178,7 +188,7 @@ $(() => {
         let commands = []
         let x = margin
         let y = margin + fontSize
-        let baseDelay = 30000 / text.length
+        let baseDelay = 26000 / text.length
         ctx.font = fontSize + 'px sans-serif'
         for (let i = 0; i < text.length; i++) {
             let letter = text[i]
